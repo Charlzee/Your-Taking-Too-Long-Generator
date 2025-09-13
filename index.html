@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YOURE TAKING TOO LONG Generator</title>
+    <style>
+
+        /* Load the font file */
+        @font-face {
+            font-family: 'DTM';
+            src: url('fonts/DTM-MONO.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body { 
+            font-family: 'DTM', Arial, sans-serif; 
+            text-align: center; 
+            margin-top: 40px; 
+            background-color: black;
+        }
+
+        h1 { 
+            color: white; 
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: gray;
+            margin-bottom: 30px;
+        }
+        h3 { color: black; }
+        h4 { color: aquamarine; }
+        h5{
+            color: white;
+            background-color: black;
+        }
+
+        /* Style for each letter button */
+        .letter-button {
+            background-color: black;
+            color: white;
+            border: none;
+            padding: 5px 3px;
+            margin: 0px;
+            font-size: 24px;
+            cursor: pointer;
+            font-family: 'DTM', Arial, sans-serif;
+            transition: 0.2s;
+        }
+
+        /* Hover effect */
+        .letter-button:hover {
+            color: rgb(160, 160, 160);
+        }
+
+        /* Toggled state */
+        .active {
+            color: rgb(60, 60, 60) !important;  /* Overrides hover */
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Current Image: <span id="currentIndexDisplay">0</span></h1>
+    <button onclick="toggleColor(this)">Refresh Preview</button>
+    <br><br><br>
+    <h5>
+        <button onclick="cycleImages('left')" style="vertical-align: middle;"><-</button>
+        
+        <img
+            src="images/Pumpkin_battle_laughing.gif"
+            alt="Pumpkin_battle_crying"
+            style="vertical-align: middle;"
+            id="mainImage"
+        >
+
+        <button onclick="cycleImages('right')" style="vertical-align: middle;">-></button>
+    </h5>
+    <h1 id="letters">
+        <!-- Each letter as a button -->
+        <button onclick="toggleColor(this)" class="letter-button">Y</button>
+        <button onclick="toggleColor(this)" class="letter-button">O</button>
+        <button onclick="toggleColor(this)" class="letter-button">U</button>
+        <button onclick="toggleColor(this)" class="letter-button">R</button>
+        <br>
+        <button onclick="toggleColor(this)" class="letter-button">T</button>
+        <button onclick="toggleColor(this)" class="letter-button">A</button>
+        <button onclick="toggleColor(this)" class="letter-button">K</button>
+        <button onclick="toggleColor(this)" class="letter-button">I</button>
+        <button onclick="toggleColor(this)" class="letter-button">N</button>
+        <button onclick="toggleColor(this)" class="letter-button">G</button>
+        <br>
+        <button onclick="toggleColor(this)" class="letter-button">T</button>
+        <button onclick="toggleColor(this)" class="letter-button">O</button>
+        <button onclick="toggleColor(this)" class="letter-button">O</button>
+        <br>
+        <button onclick="toggleColor(this)" class="letter-button">L</button>
+        <button onclick="toggleColor(this)" class="letter-button">O</button>
+        <button onclick="toggleColor(this)" class="letter-button">N</button>
+        <button onclick="toggleColor(this)" class="letter-button">G</button>
+    </h1>
+
+    <h2>Click letters to enable / disable</h2>
+
+    <h4>
+        Preview<br>
+        ⬇️
+    </h4>
+
+    <canvas id="letterCanvas" width="800" height="500" style="background-color:black; margin-top:20px;"></canvas>
+    
+    <button onclick="downloadCanvas('letterCanvas')">Download</button>
+
+    <script>
+        // List of image paths
+        var imagePaths = [
+            "images/Pumpkin_battle_laughing.gif",
+            "images/Pumpkin_battle_frowning.png",
+            "images/Pumpkin_battle_polite.png",
+            "images/Pumpkin_battle_stunned.png",
+            "images/Pumpkin_battle_crying.gif",
+            "images/Pumpkin_battle_tutu_no_arm.png",
+            "images/Pumpkin_battle_tutu.png",
+            "images/Pumpkin_battle_small.png"
+        ];
+
+        // Keep track of current image
+        currentIndex = 0;
+
+        function cycleImages(dir) {
+            // Move to the next image
+            if (dir === "right"){
+                currentIndex++;
+            }else if (dir === "left"){
+                currentIndex--;
+            }
+
+            if (currentIndex >= imagePaths.length){
+                currentIndex = 0;
+            }
+
+            if (currentIndex < 0){
+                currentIndex = imagePaths.length-1;
+            }
+            document.getElementById("currentIndexDisplay").textContent = currentIndex;
+
+            // Update the image src
+            var img = document.getElementById("mainImage");
+            img.src = imagePaths[currentIndex];
+            drawActive()
+        }
+
+        function toggleColor(button){
+            button.classList.toggle("active");
+            drawActive()
+        }
+
+        function drawActive() {
+            const canvas = document.getElementById("letterCanvas");
+            const ctx = canvas.getContext("2d");
+
+            // Clear previous drawing
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.font = "48px DTM, monospace";
+
+            let x = 10;
+            let y = 400;
+
+            const h1 = document.getElementById("letters");
+            const nodes = Array.from(h1.childNodes);
+            const img = document.getElementById("mainImage")
+
+            ctx.drawImage(
+                img,
+                (canvas.width/2)-(img.naturalWidth/2),
+                200-(img.height/2),
+                img.naturalWidth,
+                img.naturalHeight
+            );
+
+            img.onload = () => {
+                ctx.drawImage(
+                    img,
+                    (canvas.width/2)-(img.naturalWidth/2),
+                    200-(img.height/2),
+                    img.naturalWidth,
+                    img.naturalHeight
+                );
+            }
+
+            
+
+            nodes.forEach(node => {
+                if (node.nodeName === "BUTTON") {
+                    const char = node.textContent;
+                    // Invisible if active
+                    ctx.fillStyle = node.classList.contains("active") ? "rgba(0,0,0,0)" : "white";
+                    ctx.fillText(char, x, y);
+                    x += 40; // space between letters
+                } else if (node.nodeName === "BR") {
+                    x += 40;
+                }
+            });
+        }
+        function downloadCanvas(canvasId) {
+            const canvas = document.getElementById(canvasId);
+
+            // Turn canvas into a data URL (PNG image)
+            const dataURL = canvas.toDataURL("image/png");
+
+            // Create a temporary link
+            const link = document.createElement("a");
+            link.href = dataURL;
+            link.download = "preview.png"; // the filename
+            link.click();
+        }
+
+    </script>
+</body>
+</html>
